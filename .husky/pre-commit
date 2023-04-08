@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -e
+
+function backend {
+      if [ -z "$(git status --porcelain | grep -e '^[AM]\(.*\).php$'| cut -c 3- | tr '\n' ' ')" ]
+      then
+            echo "pre-commit hook:  backend     no php file found to fix."
+      else
+            composer format || true
+      fi
+}
+
+# function frontend {
+#       if [ -z "$(git status --porcelain | grep -e '^[AM]\(.*\).\(vue\|css\|js\)$' | cut -c 3- | tr '\n' ' ')" ]
+#       then
+#             echo "pre-commit hook:  frontend    no vue\css\js files found to fix."
+#       else
+#             npm run lint || true
+#             npm run format || true
+#       fi
+# }
+
+
+git add .
+echo "pre-commit hook:  backend     start"
+backend
+echo "pre-commit hook:  backend     finish"
+# echo "pre-commit hook:  frontend    start"
+# frontend
+# echo "pre-commit hook:  frontend    finish"
+
+# check if there are any unstaged changes
+ 
+if [ -n "$(git ls-files -m)" ]; then
+    git ls-files -m
+    echo "pre-commit hook:    There are changes that need to be staged"
+    exit 1
+fi
+
+echo "pre-commit hook:  All good"
+
+exit 0

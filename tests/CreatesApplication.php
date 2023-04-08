@@ -16,6 +16,13 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        if (env('LARAVEL_SAIL')) {
+            $app->make('config')->set(
+                'database.connections.mysql.database',
+                'testing'
+            );
+        }
+
         return $app;
     }
 }

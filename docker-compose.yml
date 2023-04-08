@@ -1,0 +1,96 @@
+version: '3'
+services:
+    laravel.test:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.2
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.2/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '8081:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            APP_ENV: sail
+            DB_CONNECTION: 'mysql'
+            DB_DATABASE: 'foodics_test'
+            DB_HOST: 'mysql'
+            DB_PASSWORD: 'password'
+            DB_PORT: '3306'
+            DB_USERNAME: 'root'
+            LARAVEL_SAIL: 1
+            MAIL_ENCRYPTION: 'null'
+            MAIL_HOST: 'mailpit'
+            MAIL_MAILER: 'smtp'
+            MAIL_PASSWORD: 'null'
+            MAIL_PORT: '1025'
+            MAIL_USERNAME: 'null'
+            REDIS_HOST: 'redis'
+            REDIS_PASSWORD: 'null'
+            REDIS_PORT: '6379'
+            XDEBUG_CONFIG: 'client_host=host.docker.internal'
+            XDEBUG_MODE: 'off'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+            - redis
+            - mailpit
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        ports:
+            - '33061:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            # MYSQL_ROOT_HOST: '%'
+            MYSQL_ROOT_HOST: '127.0.0.1'
+            MYSQL_DATABASE: foodics_test
+            MYSQL_USER: root
+            MYSQL_PASSWORD: password
+        volumes:
+            - 'sail-mysql:/var/lib/mysql'
+            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+    mailpit:
+        image: 'axllent/mailpit:latest'
+        ports:
+            - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+        networks:
+            - sail
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local
+    sail-redis:
+        driver: local

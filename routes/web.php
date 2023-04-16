@@ -1,6 +1,13 @@
 <?php
 
+use FoodicsTest\Models\Order;
+use FoodicsTest\Models\Stock;
+use FoodicsTest\Models\Product;
+use FoodicsTest\Models\Ingredient;
+use FoodicsTest\Models\OrderProduct;
+use FoodicsTest\Models\ProductStock;
 use Illuminate\Support\Facades\Route;
+use FoodicsTest\Models\IngredientProduct;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +21,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $stocks = Stock::all();
+    $products = Product::all();
+    $ingredients = Ingredient::all();
+    $orders = Order::all();
+    $productStock = ProductStock::all();
+    $ingredientProduct = IngredientProduct::all();
+    $orderProduct = OrderProduct::all();
+
+    return view('welcome', [
+        'stocks'            => $stocks,
+        'products'          => $products,
+        'ingredients'       => $ingredients,
+        'orders'            => $orders,
+        'productStock'      => $productStock,
+        'ingredientProduct' => $ingredientProduct,
+        'orderProduct'      => $orderProduct,
+    ]);
 });

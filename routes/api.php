@@ -1,7 +1,11 @@
 <?php
 
 use Illuminate\Http\Request;
+use FoodicsTest\Models\Stock;
+use FoodicsTest\Models\Ingredient;
 use Illuminate\Support\Facades\Route;
+use FoodicsTest\Actions\CreateNewOrder;
+use FoodicsTest\Aggregates\StockIngredientAggregateRoot;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +18,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/stock/{stock}', function (Stock $stock) {
+    $data = $stock->ingredients->map(function (Ingredient $ingredient) {
+        return [
+            'name'     => $ingredient->name,
+            'quantity' => StockIngredientAggregateRoot::retrieve($ingredient->id)->getQuantity(),
+            'low_hits' => StockIngredientAggregateRoot::retrieve($ingredient->id)->getLowIngredientHits(),
+        ];
+    });
+
+    return ['data' => $data];
 });
+
+Route::post('/ingredients/{ingredient}', function (Ingredient $ingredient, Request $request) {
+    $stockIngredient = StockIngredientAggregateRoot::retrieve($ingredient->id);
+    $stockIngredient->add($request->quantity)->persist();
+
+    return ['data' => $stockIngredient->getQuantity()];
+});
+
+Route::post('/order', CreateNewOrder::class);

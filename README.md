@@ -5,7 +5,7 @@
 
 ```bash
 # Clone the repo
-git clone xxxx
+git clone https://github.com/Mohannad-tests/foodics-test
 
 # Install dependencies
 composer install

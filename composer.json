@@ -9,7 +9,6 @@
         "barryvdh/laravel-ide-helper": "^2.13",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",
-        "laravel/horizon": "^5.15",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
         "spatie/laravel-data": "^3.4",
@@ -68,9 +67,7 @@
         "githooks-disable": [
             "npx husky uninstall"
         ],
-        "publish": [
-            "@php artisan horizon:install"
-        ]
+        "publish": []
     },
     "extra": {
         "laravel": {
